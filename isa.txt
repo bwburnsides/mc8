@@ -1,0 +1,32 @@
+No Operation
+Swap (A, B = B, A)
+Set Carry 
+Clear Carry
+Jump if Carry
+Jump if Not Carry
+Jump if Zero
+Jump if Not Zero
+Add with Carry (A += B + C)
+Add Immediate with Carry (A += Imm + C)
+Add Small Immediate (A += Imm`3)
+Subtract with Borrow (A -= B - C)
+Shift Left (A <<= 1)
+Shift Right Logical (A >>= 1)
+Shift Right Arithmetic (A >>= 1)
+Compare (A, B)
+Compare (A, IMM)
+Test A
+Test [ABS]
+Bitwise AND (A &= B)
+Bitwise OR (A |= B)
+Bitwise XOR (A ^= B)
+Bitwise NOT (~A)
+Bitwise NOT (~B)
+Load A [ABS]
+Load A [B]
+Load B [ABS]
+Load B [A]
+Store A [ABS]
+Store A [B]
+Store B [ABS]
+Store B [A]
