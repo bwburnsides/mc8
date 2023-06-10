@@ -10,22 +10,21 @@ SERIAL_PORT = 0xFF
 FIRST_TERM = 0xFE
 SECOND_TERM = 0xFD
 
-; Assumption: Registers are cleared to zero at "load-time" (pre run-time)
-; A = 0, B = 0
-
+zero  ; A = 0, B = 0
+store [FIRST_TERM], a
+clear
+addc a, 1  ; A = 1, B = 0
+store [SECOND_TERM], a
 ; FIRST_TERM = 0
 ; SECOND_TERM = 1
-store [FIRST_TERM], a
-addc a, 1
-store [SECOND_TERM], a
-
-clear
 
 loop:
-    ; A = FIRST_TERM + SECOND_TERM
-    load a, [FIRST_TERM]
-    load b, [SECOND_TERM]
-    addc a, b
+    ; A = [SECOND_TERM], B = [SECOND_TERM]
+    load a, [SECOND_TERM]
+    swap
+
+    ; A = [SECOND_TERM] + [FIRST_TERM]
+    addc a, [SECOND_TERM]
 
     jmp.c halt
     store [SERIAL_PORT], a
