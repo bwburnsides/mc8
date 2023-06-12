@@ -4,13 +4,6 @@
 #include "opcodes.py"
 #noemit off
 
-#bankdef base {
-    #bits 8
-    #addr 0x00
-    #size 0xFF + 1
-    #outp 0x00 
-}
-
 #ruledef mc8 {
     nop                   => OP_NOP`8
     swap                  => OP_SWAP`8
