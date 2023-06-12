@@ -16,19 +16,19 @@ class Control(enum.IntEnum):
     RightSelectA = 3 << 2
 
     # Line 5, 6, 7
-    JumpEnable = 0 << 4
+    LoadTemp = 0 << 4
     LoadMemoryAddressRegister = 1 << 4
     LoadA = 2 << 4
     LoadB = 3 << 4
     LoadIR = 4 << 4
-    LoadTemp = 5 << 4
+    JumpEnable = 5 << 4
     LoadMemory = 6 << 4
 
     # Line 8, 9, 10
-    AssertMemory = 0 << 7
+    AssertAlu = 0 << 7
     AssertA = 1 << 7
     AssertB = 2 << 7
-    AssertAlu = 3 << 7
+    AssertMemory = 3 << 7
     AssertTemp = 4 << 7
 
     # Line 11, 12, 13, 14
@@ -37,13 +37,12 @@ class Control(enum.IntEnum):
     AluSUB = 2 << 10
     AluSHL = 3 << 10
     AluSHR = 4 << 10
-    AluASR = 5 << 10
-    AluAND = 6 << 10
-    AluOR = 7 << 10
-    AluXOR = 8 << 10
-    AluNOT = 9 << 10
-    AluSET = 10 << 10
-    AluCLEAR = 11 << 10
+    AluAND = 5 << 10
+    AluOR = 6 << 10
+    AluXOR = 7 << 10
+    AluNOT = 8 << 10
+    AluSET = 9 << 10
+    AluCLEAR = 10 << 10
 
 
 def decode_control_lines(opcode: int, carry_flag: bool, zero_flag: bool) -> list[int]:
@@ -234,9 +233,8 @@ for state in range(2**7):
     zero_flag = bool((state >> 6) & 0b1)
 
     micro_operations = decode_control_lines(opcode, carry_flag, zero_flag)
-    microcode.extend(micro_operations)
 
-print(len(microcode))
+    microcode.extend(micro_operations)
 
 with open("microcode.bin", "wb") as out:
     write_microcode(microcode, out)

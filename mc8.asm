@@ -6,9 +6,9 @@
 
 #bankdef base {
     #bits 8
-    #addr 0x0000
-    #size 0x0100
-    #outp 0x0000 
+    #addr 0x00
+    #size 0xFF + 1
+    #outp 0x00 
 }
 
 #ruledef mc8 {
@@ -26,11 +26,11 @@
     addc a, [{addr: u8}]  => OP_ADD_WITH_MEMORY`8 @ addr
     addc a, {imm: i3}     => OP_ADD_WITH_SMALL_IMMEDIATE`5 @ imm
     subb a, b             => OP_SUB_WITH_BORROW`8
-    shl a                 => OP_SHIFT_RIGHT`8
-    shr a                 => OP_SHIFT_RIGHT`8
+    shl a, {imm: u3}      => OP_SHIFT_RIGHT_SMALL_IMMEDIATE`5 @ imm
+    shr a, {imm: u3}      => OP_SHIFT_RIGHT_SMALL_IMMEDIATE`5 @ imm
     cmp a, b              => OP_COMPARE_A
     cmp a, {imm: i8}      => OP_COMPARE_A_IMMEDIATE`8 @ imm
-    test a                => OP_TEST_A`8
+    cmp a, {imm: i3}      => OP_COMPARE_A_SMALL_IMMEDIATE`5 @ imm
     test [{addr: u8}]     => OP_TEST_MEMORY`8 @ addr
     and a, b              => OP_BITWISE_AND`8
     or a, b               => OP_BITWISE_OR`8
