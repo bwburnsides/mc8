@@ -17,17 +17,25 @@ namespace mc8 {
 
         BusRead read;
         BusWrite write;
-        size_t instructions_executed;
+        size_t cycles;
     };
 
     mc8 *create(BusRead read, BusWrite write) {
         mc8 *cpu = (mc8 *)malloc(sizeof(mc8));
-        cpu->pc = 0;
+        if (cpu == NULL)
+            return cpu;
+
         cpu->read = read;
         cpu->write = write;
-        cpu->instructions_executed = 0;
+
+        cpu->pc = 0;
         cpu->a = 0;
         cpu->b = 0;
+        cpu->carry = false;
+        cpu->zero = false;
+
+        cpu->cycles = 0;
+
         return cpu;
     }
 
@@ -36,27 +44,16 @@ namespace mc8 {
     }
 
     size_t run(mc8 *cpu, size_t cycles_left) {
-        while (cycles_left && exec_inst(cpu)) {
-            // printf("a=%d, b=%d, cf=%d, zf=%d, pc=%d\n\n", cpu->a, cpu->b, cpu->carry, cpu->zero, cpu->pc);
-
-            cycles_left--;
-        }
-        return cpu->instructions_executed;
+        while (cycles_left-- && exec_inst(cpu)) {}
+        return cpu->cycles;
     }
 
     bool exec_inst(mc8 *cpu) {
         uint8_t instruction = cpu->read(cpu->pc++);
-        // uint8_t small_immediate = 0 | (instruction & 0b111);
-        // uint8_t opcode = (instruction >> 3) & 0b11111;
-
         uint8_t small_immediate = (instruction >> 5) & 0b111;
         uint8_t opcode = instruction & 0b11111;
 
-        cpu->instructions_executed += 1;
-
-        // printf("Encoded Instruction: %d\n", instruction);
-        // printf("Decoded Opcode:      %d\n", opcode);
-        // printf("Decoded Immediate:   %d\n", small_immediate);
+        cpu->cycles += 1;
 
         uint16_t temp;
         uint8_t operand;
