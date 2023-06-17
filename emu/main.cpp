@@ -69,16 +69,21 @@ namespace bus
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2)
-    {
+    const char* rom_name;
+    size_t max_inst_cycles = 100;
+
+    if (argc < 2) {
         printf("Provide path to ROM file.\n");
         exit(-1);
     }
 
-    const char *rom_name = argv[1];
+    if (argc > 2) {
+        max_inst_cycles = atoi(argv[2]);
+    }
+
+    rom_name = argv[1];
     bus::BusError error = bus::init(rom_name);
-    if (error != bus::NO_ERROR)
-    {
+    if (error != bus::NO_ERROR) {
         printf("Bus initialization failed with code %d\n", error);
         exit(-1);
     }
@@ -87,7 +92,7 @@ int main(int argc, char *argv[])
 
     printf("%s", "Emulation beginning.\n\n");
 
-    size_t cycles = mc8::run(cpu);
+    size_t actual_cycles = mc8::run(cpu, max_inst_cycles);
     mc8::release(cpu);
 
     return 0;

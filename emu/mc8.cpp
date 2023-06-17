@@ -27,6 +27,7 @@ namespace mc8 {
         cpu->write = write;
         cpu->instructions_executed = 0;
         cpu->a = 0;
+        cpu->b = 0;
         return cpu;
     }
 
@@ -34,26 +35,28 @@ namespace mc8 {
         free(cpu);
     }
 
-    size_t run(mc8 *cpu) {
-        while (exec_inst(cpu)) {
-            printf("a=%d, b=%d, cf=%d, zf=%d, pc=%d\n\n", cpu->a, cpu->b, cpu->carry, cpu->zero, cpu->pc);
+    size_t run(mc8 *cpu, size_t cycles_left) {
+        while (cycles_left && exec_inst(cpu)) {
+            // printf("a=%d, b=%d, cf=%d, zf=%d, pc=%d\n\n", cpu->a, cpu->b, cpu->carry, cpu->zero, cpu->pc);
 
-            if (cpu->instructions_executed == 6)
-                break;
+            cycles_left--;
         }
-        // printf("a=%d, b=%d, pc=%d\n", cpu->a, cpu->b, cpu->pc);
         return cpu->instructions_executed;
     }
 
     bool exec_inst(mc8 *cpu) {
         uint8_t instruction = cpu->read(cpu->pc++);
-        uint8_t small_immediate = 0 | (instruction & 0b111);
-        uint8_t opcode = (instruction >> 3) & 0b11111;
+        // uint8_t small_immediate = 0 | (instruction & 0b111);
+        // uint8_t opcode = (instruction >> 3) & 0b11111;
+
+        uint8_t small_immediate = (instruction >> 5) & 0b111;
+        uint8_t opcode = instruction & 0b11111;
+
         cpu->instructions_executed += 1;
 
-        printf("Encoded Instruction: %d\n", instruction);
-        printf("Decoded Opcode:      %d\n", opcode);
-        printf("Decoded Immediate:   %d\n", small_immediate);
+        // printf("Encoded Instruction: %d\n", instruction);
+        // printf("Decoded Opcode:      %d\n", opcode);
+        // printf("Decoded Immediate:   %d\n", small_immediate);
 
         uint16_t temp;
         uint8_t operand;
@@ -65,6 +68,7 @@ namespace mc8 {
                 temp = cpu->b;
                 cpu->b = cpu->a;
                 cpu->a = temp & 0xff;
+                cpu->b = 5;
                 break;
             case opcode::ZERO:
                 cpu->a = 0;
@@ -92,9 +96,13 @@ namespace mc8 {
                     cpu->pc = operand;
                 break;
             case opcode::JUMP_NOT_ZERO:
+                printf("Jump if not zero\n");
                 operand = cpu->read(cpu->pc++);
-                if (!cpu->zero)
+                if (!cpu->zero) {
                     cpu->pc = operand;
+                    printf("Jumping on not zero\n");
+                }
+                    // cpu->pc = operand;
                 break;
             case opcode::ADD_WITH_CARRY:
                 temp = cpu->a + cpu->b + (cpu->carry ? 1 : 0);
@@ -119,7 +127,6 @@ namespace mc8 {
             case opcode::ADD_WITH_SMALL_IMMEDIATE:
                 temp = cpu->a + small_immediate + (cpu->carry ? 1 : 0);
                 cpu->a = temp & 0xff;
-                printf("temp: %d\n", temp);
                 cpu->carry = temp > 0xff;
                 cpu->zero = cpu->a == 0;
                 break;

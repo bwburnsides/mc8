@@ -17,13 +17,13 @@
     addc a, b             => OP_ADD_WITH_CARRY`8
     addc a, {imm: i8}     => OP_ADD_WITH_IMMEDIATE`8 @ imm
     addc a, [{addr: u8}]  => OP_ADD_WITH_MEMORY`8 @ addr
-    addc a, {imm: i3}     => OP_ADD_WITH_SMALL_IMMEDIATE`5 @ imm
+    addc a, {imm: i3}     => imm @ OP_ADD_WITH_SMALL_IMMEDIATE`5
     subb a, b             => OP_SUB_WITH_BORROW`8
-    shl a, {imm: u3}      => OP_SHIFT_RIGHT_SMALL_IMMEDIATE`5 @ imm
-    shr a, {imm: u3}      => OP_SHIFT_RIGHT_SMALL_IMMEDIATE`5 @ imm
+    shl a, {imm: u3}      => imm @ OP_SHIFT_RIGHT_SMALL_IMMEDIATE`5
+    shr a, {imm: u3}      => imm @ OP_SHIFT_RIGHT_SMALL_IMMEDIATE`5
     cmp a, b              => OP_COMPARE_A
     cmp a, {imm: i8}      => OP_COMPARE_A_IMMEDIATE`8 @ imm
-    cmp a, {imm: i3}      => OP_COMPARE_A_SMALL_IMMEDIATE`5 @ imm
+    cmp a, {imm: i3}      => imm @ OP_COMPARE_A_SMALL_IMMEDIATE`5
     test [{addr: u8}]     => OP_TEST_MEMORY`8 @ addr
     and a, b              => OP_BITWISE_AND`8
     or a, b               => OP_BITWISE_OR`8
