@@ -29,12 +29,12 @@
     or a, b               => OP_BITWISE_OR`8
     xor a, b              => OP_BITWISE_XOR`8
     not a                 => OP_BITWISE_NOT_A`8
-    load a, [{addr: u8}]  => OP_LOAD_A_MEMORY`8
+    load a, [{addr: u8}]  => OP_LOAD_A_MEMORY`8 @ addr
     load a, [b]           => OP_LOAD_A_FROM_B`8
-    load b, [{addr: u8}]  => OP_LOAD_B_MEMORY`8
+    load b, [{addr: u8}]  => OP_LOAD_B_MEMORY`8 @ addr
     load b, [a]           => OP_LOAD_B_FROM_A`8
-    store [{addr: u8}], a => OP_STORE_A_MEMORY`8
+    store [{addr: u8}], a => OP_STORE_A_MEMORY`8 @ addr
     store [b], a          => OP_STORE_A_AT_B`8
-    store [{addr: u8}], b => OP_STORE_B_MEMORY`8
+    store [{addr: u8}], b => OP_STORE_B_MEMORY`8 @ addr
     store [a], b          => OP_STORE_B_AT_A`8
 }

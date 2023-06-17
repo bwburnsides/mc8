@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 namespace mc8 {
-    bool exec_inst(mc8* cpu);
+    bool exec_inst(mc8 *cpu);
 
     struct mc8 {
         uint8_t pc;
@@ -17,33 +17,43 @@ namespace mc8 {
 
         BusRead read;
         BusWrite write;
-        size_t cycles;
+        size_t instructions_executed;
     };
 
-    mc8* create(BusRead read, BusWrite write) {
-        mc8* cpu = (mc8*) malloc(sizeof(mc8));
+    mc8 *create(BusRead read, BusWrite write) {
+        mc8 *cpu = (mc8 *)malloc(sizeof(mc8));
         cpu->pc = 0;
         cpu->read = read;
         cpu->write = write;
-        cpu->cycles = 0;
+        cpu->instructions_executed = 0;
+        cpu->a = 0;
         return cpu;
     }
 
-    void release(mc8* cpu) {
+    void release(mc8 *cpu) {
         free(cpu);
     }
 
-    size_t run(mc8* cpu) {
-        while (exec_inst(cpu)) {}
-        printf("a=%d, b=%d, pc=%d\n", cpu->a, cpu->b, cpu->pc);
-        return cpu->cycles;
+    size_t run(mc8 *cpu) {
+        while (exec_inst(cpu)) {
+            printf("a=%d, b=%d, cf=%d, zf=%d, pc=%d\n\n", cpu->a, cpu->b, cpu->carry, cpu->zero, cpu->pc);
+
+            if (cpu->instructions_executed == 6)
+                break;
+        }
+        // printf("a=%d, b=%d, pc=%d\n", cpu->a, cpu->b, cpu->pc);
+        return cpu->instructions_executed;
     }
 
-    bool exec_inst(mc8* cpu) {
+    bool exec_inst(mc8 *cpu) {
         uint8_t instruction = cpu->read(cpu->pc++);
-        uint8_t small_immediate = instruction & 0b111;
+        uint8_t small_immediate = 0 | (instruction & 0b111);
         uint8_t opcode = (instruction >> 3) & 0b11111;
-        cpu->cycles += 4;
+        cpu->instructions_executed += 1;
+
+        printf("Encoded Instruction: %d\n", instruction);
+        printf("Decoded Opcode:      %d\n", opcode);
+        printf("Decoded Immediate:   %d\n", small_immediate);
 
         uint16_t temp;
         uint8_t operand;
@@ -109,6 +119,7 @@ namespace mc8 {
             case opcode::ADD_WITH_SMALL_IMMEDIATE:
                 temp = cpu->a + small_immediate + (cpu->carry ? 1 : 0);
                 cpu->a = temp & 0xff;
+                printf("temp: %d\n", temp);
                 cpu->carry = temp > 0xff;
                 cpu->zero = cpu->a == 0;
                 break;
@@ -199,6 +210,7 @@ namespace mc8 {
             case opcode::STORE_B_AT_A:
                 return cpu->write(cpu->a, cpu->b);
             default:
+                printf("Encountered illegal opcode. Opcode: %d, Inst: %d\n", opcode, instruction);
                 return false;
         }
 
