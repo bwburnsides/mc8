@@ -1,9 +1,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "mc8.h"
+#include "dis.h"
 #include "opcodes.h"
-
-#include <stdio.h>
 
 namespace mc8 {
     bool exec_inst(mc8 *cpu);
@@ -17,7 +16,7 @@ namespace mc8 {
 
         BusRead read;
         BusWrite write;
-        size_t cycles;
+        uint32_t cycles;
     };
 
     mc8 *create(BusRead read, BusWrite write) {
@@ -43,15 +42,16 @@ namespace mc8 {
         free(cpu);
     }
 
-    size_t run(mc8 *cpu, size_t cycles_left) {
+    uint32_t run(mc8 *cpu, size_t cycles_left) {
         while (cycles_left-- && exec_inst(cpu)) {}
         return cpu->cycles;
     }
 
     bool exec_inst(mc8 *cpu) {
         uint8_t instruction = cpu->read(cpu->pc++);
-        uint8_t small_immediate = (instruction >> 5) & 0b111;
-        uint8_t opcode = instruction & 0b11111;
+        uint8_t small_immediate;
+        uint8_t opcode;
+        dis::decode_instruction(instruction, &opcode, &small_immediate);
 
         cpu->cycles += 1;
 
@@ -93,13 +93,9 @@ namespace mc8 {
                     cpu->pc = operand;
                 break;
             case opcode::JUMP_NOT_ZERO:
-                printf("Jump if not zero\n");
                 operand = cpu->read(cpu->pc++);
-                if (!cpu->zero) {
+                if (!cpu->zero)
                     cpu->pc = operand;
-                    printf("Jumping on not zero\n");
-                }
-                    // cpu->pc = operand;
                 break;
             case opcode::ADD_WITH_CARRY:
                 temp = cpu->a + cpu->b + (cpu->carry ? 1 : 0);
@@ -147,18 +143,19 @@ namespace mc8 {
                 cpu->zero = cpu->a == 0;
                 break;
             case opcode::COMPARE_A_B:
-                temp = cpu->a - cpu->b;
+                temp = cpu->b - cpu->a;
                 cpu->carry = temp > 0xff;
                 cpu->zero = temp == 0;
                 break;
             case opcode::COMPARE_A_IMMEDIATE:
                 operand = cpu->read(cpu->pc++);
-                temp = cpu->a - operand;
+                temp = operand - cpu->a;
                 cpu->carry = temp > 0xff;
                 cpu->zero = temp == 0;
+                // printf("Executed the compare - Z%d, C%d\n", cpu->zero, cpu->carry);
                 break;
             case opcode::COMPARE_A_SMALL_IMMEDIATE:
-                temp = cpu->a - small_immediate;
+                temp = small_immediate - cpu->a;
                 cpu->carry = temp > 0xff;
                 cpu->zero = temp == 0;
                 break;
@@ -220,5 +217,4 @@ namespace mc8 {
 
         return true;
     }
-
-};
+}

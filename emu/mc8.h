@@ -11,7 +11,7 @@ namespace mc8 {
     mc8* create(BusRead read, BusWrite write);
     void release(mc8* cpu);
 
-    size_t run(mc8* cpu, size_t max_cycles);
-};
+    uint32_t run(mc8* cpu, size_t max_cycles);
+}
 
 #endif

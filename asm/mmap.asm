@@ -14,25 +14,25 @@
     ; Non-writable
 }
 
-EMU_HALT_ADDR = 0
-SERIAL_CTRL_ADDR = 0xFE
-SERIAL_DATA_ADDR = 0xFF
+HALT_EMULATOR = 0
+SERIAL_CONTROL = 0xFE
+SERIAL_DATA = 0xFF
 
 #ruledef emu_ctrl {
     halt => asm {
-        store [EMU_HALT_ADDR], a
+        store [HALT_EMULATOR], a
     }
     in a => asm {
-        load a, [SERIAL_DATA_ADDR]
+        load a, [SERIAL_DATA]
     }
     in b => asm {
-        load b, [SERIAL_DATA_ADDR]
+        load b, [SERIAL_DATA]
     }
     out a => asm {
-        store [SERIAL_DATA_ADDR], a
+        store [SERIAL_DATA], a
     }
     out b => asm {
-        store [SERIAL_DATA_ADDR], b
+        store [SERIAL_DATA], b
     }
 }
 

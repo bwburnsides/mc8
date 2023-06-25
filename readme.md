@@ -11,15 +11,17 @@ The CPU simulation is found in `cpu.dig`, where `.dig` is a file format for [Dig
 ```
 The ROM chip in the simulation is configured to load the bootloader. The source is found in `boot.asm`. It must be assembled via [customasm](https://github.com/hlorenzi/customasm).
 ```
-% customasm boot.asm
+% mkdir bin/
+% customasm asm/boot.asm -o bin/boot.bin
 ```
 The emulator is found in `emu/` and should be compatible with most C++ compilers. With GCC:
 ```
-% g++ emu/main.cpp emu/main.cpp -o emulator
+% mkdir bin/
+% g++ emu/main.cpp emu/mc8.cpp emu/dis.cpp emu/bus.cpp -o bin/emulator.exe
 ```
 The ROM file is provided via a command line argument:
 ```
-% ./emulator boot.bin
+% ./bin/emulator.exe bin/boot.bin
 ```
 
 ## Programming Model
