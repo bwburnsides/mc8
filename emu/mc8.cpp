@@ -1,8 +1,9 @@
-#include <stdint.h>
 #include <stdlib.h>
+#include <stdint.h>
+
+#include "opcodes.h"
 #include "mc8.h"
 #include "dis.h"
-#include "opcodes.h"
 
 namespace mc8 {
     bool exec_inst(mc8 *cpu);

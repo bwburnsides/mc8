@@ -1,6 +1,6 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
-#include <stdlib.h>
 
 #include "bus.h"
 #include "dis.h"
@@ -21,20 +21,18 @@ namespace bus {
     const uint8_t ROM_BASE = 0;
     const uint16_t ROM_SIZE = 32;
 
-    FILE* output;
+    const uint8_t SERIAL_OUTPUT = 0;
+    const uint8_t HALT_EMULATOR = 1;
+    const uint8_t SERIAL_CONTROL = 254;
+    const uint8_t SERIAL_INPUT = 255;
 
     const char* error_repr(const BusError error) {
         switch (error) {
-            case NO_ERROR:
-                return "NO_ERROR";
-            case OPEN_ROM_FILE_FAILURE:
-                return "OPEN_ROM_FILE_FAILURE";
-            case ROM_FILE_TOO_SMALL:
-                return "ROM_FILE_TOO_SMALL";
-            case CLOSE_ROM_FILE_FAILURE:
-                return "CLOSE_ROM_FILE_FAILURE";
-            default:
-                return "UNKNOWN_ERROR";
+            case NO_ERROR:                  return "NO_ERROR";
+            case OPEN_ROM_FILE_FAILURE:     return "OPEN_ROM_FILE_FAILURE";
+            case ROM_FILE_TOO_SMALL:        return "ROM_FILE_TOO_SMALL";
+            case CLOSE_ROM_FILE_FAILURE:    return "CLOSE_ROM_FILE_FAILURE";
+            default:                        return "UNKNOWN_ERROR";
         }
     }
 
@@ -65,17 +63,17 @@ namespace bus {
     }
 
     bool write(uint8_t addr, uint8_t data) {
-        if (addr == 0x00) {
-            printf("Emulator halted.\n");
-            return false;
-        }
-
-        if (addr > 0x1f) {
-            memory[addr] = data;
-        }
-
-        if (addr == 0xff) {
-            printf("%c", (char) data);
+        switch (addr) {
+            case HALT_EMULATOR:
+                printf("Emulator halted.\n");
+                return false;
+            case SERIAL_OUTPUT:
+                printf("%c", (char)data);
+                break;
+            default:
+                if (addr > (ROM_BASE + ROM_SIZE - 1)) {
+                    memory[addr] = data;
+                }
         }
 
         return true;

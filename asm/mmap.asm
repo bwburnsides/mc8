@@ -1,3 +1,10 @@
+; Defines the memory map of the conceptual MC8-based computer meant for
+; implementation in Minecraft. This memory map defines a small ROM bank
+; for a serial bootloader, memory-mapped serial IO registers, and a 
+; large RAM bank for the remainder of the address space. This is an
+; include file that should be included in MC8 assembly files which target
+; this computer architecture.
+
 #once
 #include "mc8.asm"
 
@@ -14,26 +21,15 @@
     ; Non-writable
 }
 
-HALT_EMULATOR = 0
-SERIAL_CONTROL = 0xFE
-SERIAL_DATA = 0xFF
+SERIAL_OUTPUT = 0x00
+SERIAL_CTRL   = 0xFE
+SERIAL_INPUT  = 0xFF
 
-#ruledef emu_ctrl {
-    halt => asm {
-        store [HALT_EMULATOR], a
-    }
-    in a => asm {
-        load a, [SERIAL_DATA]
-    }
-    in b => asm {
-        load b, [SERIAL_DATA]
-    }
-    out a => asm {
-        store [SERIAL_DATA], a
-    }
-    out b => asm {
-        store [SERIAL_DATA], b
-    }
+#ruledef serial_interface {
+    in a  => asm { load a, [SERIAL_INPUT]   }
+    in b  => asm { load b, [SERIAL_INPUT]   }
+    out a => asm { store [SERIAL_OUTPUT], a }
+    out b => asm { store [SERIAL_OUTPUT], b }
 }
 
 #bank rom

@@ -17,11 +17,11 @@ The ROM chip in the simulation is configured to load the bootloader. The source 
 The emulator is found in `emu/` and should be compatible with most C++ compilers. With GCC:
 ```
 % mkdir bin/
-% g++ emu/main.cpp emu/mc8.cpp emu/dis.cpp emu/bus.cpp -o bin/emulator.exe
+% g++ emu/main.cpp emu/mc8.cpp emu/dis.cpp emu/bus.cpp -o bin/emulator
 ```
 The ROM file is provided via a command line argument:
 ```
-% ./bin/emulator.exe bin/boot.bin
+% ./bin/emulator bin/boot.bin
 ```
 
 ## Programming Model

@@ -1,3 +1,6 @@
+; Defines the mnemonics and encoding of the MC8 instruction set.
+; This is an include file that must be included in any MC8 assembly file.
+
 #once
 
 #noemit on

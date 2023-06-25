@@ -1,8 +1,8 @@
 #ifndef BUS_H
 #define BUS_H
 
-#include <stdint.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 namespace bus {
     extern const uint8_t ROM_BASE;

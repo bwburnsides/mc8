@@ -1,8 +1,8 @@
 #ifndef DISASM_H
 #define DISASM_H
 
-#include <stdint.h>
 #include <stdio.h>
+#include <stdint.h>
 
 namespace dis {
     void decode_instruction(uint8_t instruction, uint8_t* opcode, uint8_t* immediate);

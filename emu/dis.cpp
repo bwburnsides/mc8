@@ -2,10 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "dis.h"
 #include "opcodes.h"
-
-#define DISASSEMBLY_LENGTH 100
+#include "dis.h"
 
 namespace dis {
     void decode_instruction(uint8_t instruction, uint8_t* opcode, uint8_t* immediate) {
