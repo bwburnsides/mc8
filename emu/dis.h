@@ -8,6 +8,7 @@
 namespace dis {
 
     // TODO: Generalize parameter types for emulation system.
+
     /// @brief Decode instruction into constituent elements.
     /// @param[in] instruction Encoded instruction to decode.
     /// @param[out] opcode Decoded opcode from instruction.
@@ -15,6 +16,7 @@ namespace dis {
     void decode_instruction(const uint8_t instruction, uint8_t *const opcode, uint8_t *const immediate);
 
     // TODO: Generalize parameter and return types for emulation system.
+
     /// @brief Disassemble instruction found at specified address.
     /// @param[in] output_stream Stream to write disassembly to.
     /// @param[in] address Address instruction is found at.

@@ -7,6 +7,7 @@
 
 // TODO: Generalize address and data widths for emulation system.
 // TODO: Provide control line features to bus interactions for emulation system.
+
 /// @brief Contains declarations relating to 8-bit bus interactions.
 namespace bus {
 
@@ -46,6 +47,7 @@ namespace bus {
     void release(Bus *const bus);
 
     // TODO: read should return bool to designate success like write.
+
     /// @brief Read a value from bus.
     /// @param[in] bus Bus to read from.
     /// @param[in] addr Address to read from on bus.
@@ -53,6 +55,7 @@ namespace bus {
     uint8_t read(Bus *const bus, const uint8_t addr);
 
     // TODO: write should return BusError to designate success.
+
     /// @brief Write a value to bus.
     /// @param[in] bus Bus to write to.
     /// @param[in] addr Address to write to on bus.

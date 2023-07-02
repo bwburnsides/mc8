@@ -6,14 +6,17 @@
 #include "bus.h"
 
 // TODO: Namespace should be renamed to cpu to generalize emulation system.
+
 /// @brief Contains declarations relating to 8-bit CPU operation.
 namespace mc8 {
 
     // TODO: Struct should be renamed to cpu to generalize emulation system.
+
     /// @brief An 8-bit CPU and associated state.
     typedef struct mc8 mc8;
 
     // TODO: Would using integers give implementors flexibility in error definition?
+
     /// @brief Error cases over life cycle of CPU operation.
     enum CpuError {
         NO_ERROR,
@@ -22,6 +25,7 @@ namespace mc8 {
     };
 
     // TODO: Accept char* as parameter to give implementors flexibility in representation.
+
     /// @brief Return a C-string representation of the provided CpuError
     /// @param[in] error CpuError to represent.
     /// @return C-string representation of error.
@@ -41,7 +45,8 @@ namespace mc8 {
     void release(mc8 *const cpu);
 
     // TODO: Run needs a way to signify reason for finishing. Via BusError?
-    /// @brief Run Execute CPU instructions.
+
+    /// @brief Execute CPU instructions.
     /// @param[in] cpu CPU to execute via.
     /// @param[in] max_cycles Maximum number of instructions to execute. 
     /// @return Actual number of instructions executed.
