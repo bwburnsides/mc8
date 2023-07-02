@@ -16,7 +16,10 @@ namespace bus {
     */
 
     const uint16_t ADDRESS_SPACE_SIZE = 256;
-    uint8_t memory[ADDRESS_SPACE_SIZE];
+
+    struct Bus {
+        uint8_t memory[ADDRESS_SPACE_SIZE];
+    };
 
     const uint8_t ROM_BASE = 0;
     const uint16_t ROM_SIZE = 32;
@@ -29,6 +32,7 @@ namespace bus {
     const char* error_repr(const BusError error) {
         switch (error) {
             case NO_ERROR:                  return "NO_ERROR";
+            case BUS_ALLOCATION_FAILURE:    return "BUS_ALLOCATION_FAILURE";
             case OPEN_ROM_FILE_FAILURE:     return "OPEN_ROM_FILE_FAILURE";
             case ROM_FILE_TOO_SMALL:        return "ROM_FILE_TOO_SMALL";
             case CLOSE_ROM_FILE_FAILURE:    return "CLOSE_ROM_FILE_FAILURE";
@@ -36,33 +40,52 @@ namespace bus {
         }
     }
 
-    BusError init(const char *const rom_name) {
+    Bus *create(char *const rom_name, BusError *const error) {
+        *error = NO_ERROR;
+
+        Bus *bus = (Bus*)malloc(sizeof(Bus));
+        if (bus == NULL) {
+            *error = BUS_ALLOCATION_FAILURE;
+            return bus;
+        }
+
         for (size_t idx = 0; idx < ADDRESS_SPACE_SIZE; idx++) {
-            memory[idx] = 0;
+            bus->memory[idx] = 0;
         }
 
         FILE *rom_file = fopen(rom_name, "r");
         if (rom_file == NULL) {
-            return OPEN_ROM_FILE_FAILURE;
+            *error = OPEN_ROM_FILE_FAILURE;
+            free(bus);
+            return bus;
         }
 
-        if (fread(memory, sizeof(uint8_t), ROM_SIZE, rom_file) != ROM_SIZE) {
+        if (fread(bus->memory, sizeof(uint8_t), ROM_SIZE, rom_file) != ROM_SIZE) {
             // TODO: ROM_FILE_TOO_LARGE
-            return ROM_FILE_TOO_SMALL;
+            *error = ROM_FILE_TOO_SMALL;
+            free(bus);
+            return bus;
         }
 
         if (fclose(rom_file) != 0) {
-            return CLOSE_ROM_FILE_FAILURE;
+
+            *error =  CLOSE_ROM_FILE_FAILURE;
+            free(bus);
+            return bus;
         }
 
-        return NO_ERROR;
+        return bus;
     }
 
-    uint8_t read(uint8_t addr) {
-        return memory[addr];
+    void release(Bus *const bus) {
+        free(bus);
     }
 
-    bool write(uint8_t addr, uint8_t data) {
+    uint8_t read(Bus *const bus, const uint8_t addr) {
+        return bus->memory[addr];
+    }
+
+    bool write(Bus *const bus, const uint8_t addr, const uint8_t data) {
         switch (addr) {
             case HALT_EMULATOR:
                 printf("Emulator halted.\n");
@@ -72,21 +95,21 @@ namespace bus {
                 break;
             default:
                 if (addr > (ROM_BASE + ROM_SIZE - 1)) {
-                    memory[addr] = data;
+                    bus->memory[addr] = data;
                 }
         }
 
         return true;
     }
 
-    void disassemble(FILE* const output_stream, const uint8_t start_address, const uint8_t end_address) {
+    void disassemble(Bus *const bus, FILE *const output_stream, const uint8_t start_address, const uint8_t end_address) {
         uint8_t instruction;
         uint8_t operand;
         bool consume_operand;
 
         for (uint8_t index = start_address; index < end_address; index++) {
-            instruction = memory[index];
-            operand = memory[index + 1];
+            instruction = bus->memory[index];
+            operand = bus->memory[index + 1];
             consume_operand = dis::disassemble_instruction(output_stream, index, instruction, operand);
 
             if (consume_operand) {

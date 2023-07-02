@@ -73,19 +73,21 @@ int main(int argc, char *argv[]) {
         args.max_cycles
     );
 
-    bus::BusError error = bus::init(args.rom_name);
-    if (error != bus::NO_ERROR) {
-        printf("Bus initialization failed with code %s\n", bus::error_repr(error));
-        return -1;
+    bus::BusError bus_error;
+    bus::Bus *bus = bus::create(args.rom_name, &bus_error);
+    if (bus_error != bus::NO_ERROR) {
+        printf("Bus initialization failed with code %s\n", bus::error_repr(bus_error));
+        return EXIT_FAILURE;
     }
 
     printf("Disassembly of ROM (%d bytes)\n", bus::ROM_SIZE);
-    bus::disassemble(stdout, bus::ROM_BASE, bus::ROM_BASE + bus::ROM_SIZE);
+    bus::disassemble(bus, stdout, bus::ROM_BASE, bus::ROM_BASE + bus::ROM_SIZE);
     printf("\n");
 
-    mc8::mc8 *cpu = mc8::create(&bus::read, &bus::write);
-    if (cpu == NULL) {
-        printf("Failed to allocate memory for CPU.\n");
+    mc8::CpuError cpu_error;
+    mc8::mc8 *cpu = mc8::create(bus, &cpu_error);
+    if (cpu_error != mc8::NO_ERROR) {
+        printf("CPU initialization failed with code %s\n", mc8::error_repr(cpu_error));
         return EXIT_FAILURE;
     }
 

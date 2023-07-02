@@ -4,30 +4,48 @@
 #include "opcodes.h"
 #include "mc8.h"
 #include "dis.h"
+#include "bus.h"
 
 namespace mc8 {
     bool exec_inst(mc8 *cpu);
 
     struct mc8 {
+        bus::Bus* bus;
+
         uint8_t pc;
         uint8_t a;
         uint8_t b;
         bool carry;
         bool zero;
 
-        BusRead read;
-        BusWrite write;
         uint32_t cycles;
     };
 
-    mc8 *create(BusRead read, BusWrite write) {
+    const char *error_repr(const CpuError error) {
+        switch (error) {
+            case NO_ERROR:                  return "NO_ERROR";
+            case CPU_ALLOCATION_FAILURE:    return "CPU_ALLOCATION_FAILURE";
+            case NULL_BUS:                  return "NULL_BUS";
+            default:                        return "UNKNOWN_ERROR";
+        }
+    }
+
+    mc8 *create(bus::Bus *const bus, CpuError *const error) {
+        *error = NO_ERROR;
+
+        if (bus == NULL) {
+            *error = NULL_BUS;
+            return NULL;
+        }
+
         mc8 *cpu = (mc8 *)malloc(sizeof(mc8));
-        if (cpu == NULL)
+        if (cpu == NULL) {
+            *error = CPU_ALLOCATION_FAILURE;
+            free(bus);
             return cpu;
+        }
 
-        cpu->read = read;
-        cpu->write = write;
-
+        cpu->bus = bus;
         cpu->pc = 0;
         cpu->a = 0;
         cpu->b = 0;
@@ -39,17 +57,18 @@ namespace mc8 {
         return cpu;
     }
 
-    void release(mc8 *cpu) {
+    void release(mc8 *const cpu) {
+        free(cpu->bus);
         free(cpu);
     }
 
-    uint32_t run(mc8 *cpu, size_t cycles_left) {
+    uint32_t run(mc8 *const cpu, uint32_t cycles_left) {
         while (cycles_left-- && exec_inst(cpu)) {}
         return cpu->cycles;
     }
 
     bool exec_inst(mc8 *cpu) {
-        uint8_t instruction = cpu->read(cpu->pc++);
+        uint8_t instruction = bus::read(cpu->bus, cpu->pc++);
         uint8_t small_immediate;
         uint8_t opcode;
         dis::decode_instruction(instruction, &opcode, &small_immediate);
@@ -79,22 +98,22 @@ namespace mc8 {
                 cpu->carry = false;
                 break;
             case opcode::JUMP_CARRY:
-                operand = cpu->read(cpu->pc++);
+                operand = bus::read(cpu->bus, cpu->pc++);
                 if (cpu->carry)
                     cpu->pc = operand;
                 break;
             case opcode::JUMP_NOT_CARRY:
-                operand = cpu->read(cpu->pc++);
+                operand = bus::read(cpu->bus, cpu->pc++);
                 if (!cpu->carry)
                     cpu->pc = operand;
                 break;
             case opcode::JUMP_ZERO:
-                operand = cpu->read(cpu->pc++);
+                operand = bus::read(cpu->bus, cpu->pc++);
                 if (cpu->zero)
                     cpu->pc = operand;
                 break;
             case opcode::JUMP_NOT_ZERO:
-                operand = cpu->read(cpu->pc++);
+                operand = bus::read(cpu->bus, cpu->pc++);
                 if (!cpu->zero)
                     cpu->pc = operand;
                 break;
@@ -105,15 +124,15 @@ namespace mc8 {
                 cpu->zero = cpu->a == 0;
                 break;
             case opcode::ADD_WITH_IMMEDIATE:
-                operand = cpu->read(cpu->pc++);
+                operand = bus::read(cpu->bus, cpu->pc++);
                 temp = cpu->a + operand + (cpu->carry ? 1 : 0);
                 cpu->a = temp & 0xff;
                 cpu->carry = temp > 0xff;
                 cpu->zero = cpu->a == 0;
                 break;
             case opcode::ADD_WITH_MEMORY:
-                operand = cpu->read(cpu->pc++);
-                temp = cpu->a + cpu->read(operand) + (cpu->carry ? 1 : 0);
+                operand = bus::read(cpu->bus, cpu->pc++);
+                temp = cpu->a + bus::read(cpu->bus, operand) + (cpu->carry ? 1 : 0);
                 cpu->a = temp & 0xff;
                 cpu->carry = temp > 0xff;
                 cpu->zero = cpu->a == 0;
@@ -149,7 +168,7 @@ namespace mc8 {
                 cpu->zero = temp == 0;
                 break;
             case opcode::COMPARE_A_IMMEDIATE:
-                operand = cpu->read(cpu->pc++);
+                operand = bus::read(cpu->bus, cpu->pc++);
                 temp = operand - cpu->a;
                 cpu->carry = temp > 0xff;
                 cpu->zero = temp == 0;
@@ -162,8 +181,8 @@ namespace mc8 {
                 break;
             case opcode::TEST_MEMORY:
                 // TODO: Replace this instruction with a shift left instruction?
-                operand = cpu->read(cpu->pc++);
-                temp = cpu->read(operand) & cpu->read(operand);
+                operand = bus::read(cpu->bus, cpu->pc++);
+                temp = bus::read(cpu->bus, operand) & bus::read(cpu->bus, operand);
                 cpu->carry = false;
                 cpu->zero = temp == 0;
                 break;
@@ -188,29 +207,29 @@ namespace mc8 {
                 cpu->zero = cpu->a == 0;
                 break;
             case opcode::LOAD_A_MEMORY:
-                operand = cpu->read(cpu->pc++);
-                cpu->a = cpu->read(operand);
+                operand = bus::read(cpu->bus, cpu->pc++);
+                cpu->a = bus::read(cpu->bus, operand);
                 break;
             case opcode::LOAD_A_FROM_B:
-                cpu->a = cpu->read(cpu->b);
+                cpu->a = bus::read(cpu->bus, cpu->b);
                 break;
             case opcode::LOAD_B_MEMORY:
-                operand = cpu->read(cpu->pc++);
-                cpu->b = cpu->read(operand);
+                operand = bus::read(cpu->bus, cpu->pc++);
+                cpu->b = bus::read(cpu->bus, operand);
                 break;
             case opcode::LOAD_B_FROM_A:
-                cpu->b = cpu->read(cpu->a);
+                cpu->b = bus::read(cpu->bus, cpu->a);
                 break;
             case opcode::STORE_A_MEMORY:
-                operand = cpu->read(cpu->pc++);
-                return cpu->write(operand, cpu->a);
+                operand = bus::read(cpu->bus, cpu->pc++);
+                return bus::write(cpu->bus, operand, cpu->a);
             case opcode::STORE_A_AT_B:
-                return cpu->write(cpu->b, cpu->a);
+                return bus::write(cpu->bus, cpu->b, cpu->a);
             case opcode::STORE_B_MEMORY:
-                operand = cpu->read(cpu->pc++);
-                return cpu->write(operand, cpu->b);
+                operand = bus::read(cpu->bus, cpu->pc++);
+                return bus::write(cpu->bus, operand, cpu->b);
             case opcode::STORE_B_AT_A:
-                return cpu->write(cpu->a, cpu->b);
+                return bus::write(cpu->bus, cpu->a, cpu->b);
             default:
                 printf("Encountered illegal opcode. Opcode: %d, Inst: %d\n", opcode, instruction);
                 return false;

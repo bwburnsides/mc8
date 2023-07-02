@@ -6,12 +6,12 @@
 #include "dis.h"
 
 namespace dis {
-    void decode_instruction(uint8_t instruction, uint8_t* opcode, uint8_t* immediate) {
+    void decode_instruction(const uint8_t instruction, uint8_t *const opcode, uint8_t *const immediate) {
         *immediate = (instruction >> 5) & 0b111;
         *opcode = instruction & 0b11111;
     }
 
-    bool disassemble_instruction(FILE* output_stream, const uint8_t address, const uint8_t instruction, const uint8_t operand) {
+    bool disassemble_instruction(FILE *const output_stream, const uint8_t address, const uint8_t instruction, const uint8_t operand) {
         bool consume_operand = false;
 
         uint8_t opcode;
