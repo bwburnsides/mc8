@@ -23,7 +23,8 @@ The ROM file is provided via a command line argument:
 ```
 % ./bin/emulator bin/boot.bin
 ```
-
+For systems with GCC available, the `mc8.py` script can be used to perform builds and runs: `python mc8.py run rom_file` or
+`python mc8.py build`.
 ## Programming Model
 
 ### Program Counter (8-bit)

@@ -52,7 +52,9 @@ def decode_control_lines(opcode: int, carry_flag: bool, zero_flag: bool) -> list
         ...
 
     if opcode == OP_ZERO:
-        operations[1] = Control.RightSelectA | Control.AluXOR | Control.AssertAlu | Control.LoadA
+        operations[1] = (
+            Control.RightSelectA | Control.AluXOR | Control.AssertAlu | Control.LoadA
+        )
         operations[2] = Control.AssertA | Control.LoadB
 
     if opcode == OP_SWAP:
@@ -114,7 +116,11 @@ def decode_control_lines(opcode: int, carry_flag: bool, zero_flag: bool) -> list
         )
 
     if opcode == OP_ADD_WITH_MEMORY:
-        operations[1] = Control.LoadProgramCounter | Control.AssertMemory | Control.LoadMemoryAddressRegister
+        operations[1] = (
+            Control.LoadProgramCounter
+            | Control.AssertMemory
+            | Control.LoadMemoryAddressRegister
+        )
         operations[2] = Control.AddressSelect | Control.AssertMemory | Control.LoadTemp
         operations[3] = Control.AluADD | Control.AssertAlu | Control.LoadA
 
@@ -150,7 +156,9 @@ def decode_control_lines(opcode: int, carry_flag: bool, zero_flag: bool) -> list
 
     if opcode == OP_TEST_MEMORY:
         operations[1] = (
-            Control.LoadProgramCounter | Control.AssertMemory | Control.LoadMemoryAddressRegister
+            Control.LoadProgramCounter
+            | Control.AssertMemory
+            | Control.LoadMemoryAddressRegister
         )
         operations[2] = Control.AddressSelect | Control.AssertMemory | Control.LoadTemp
         operations[3] = Control.AluAND | Control.RightSelectA

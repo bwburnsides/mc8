@@ -3,9 +3,7 @@
 
 #once
 
-#noemit on
 #include "../opcodes.py"
-#noemit off
 
 #ruledef mc8 {
     nop                   =>       OP_NOP`8
